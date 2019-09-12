@@ -5,14 +5,14 @@ require('dotenv').config()
 
 const Web3 = require('web3')
 const axios = require('axios')
-const EthereumTx = require('ethereumjs-tx')
+const EthereumTx = require('ethereumjs-tx').Transaction 
 const log = require('ololog').configure({ time: true })
 const ansi = require('ansicolor').nice
 
 /**
  * Network configuration
  */
-const testnet = `https://rinkeby.infura.io/${process.env.INFURA_ACCESS_TOKEN}`
+const testnet = `https://rinkeby.infura.io/v3/${process.env.INFURA_ACCESS_TOKEN}`
 
 
 /**
@@ -31,7 +31,7 @@ web3.eth.defaultAccount = process.env.WALLET_ADDRESS
  * The amount of ETH you want to send in this transaction
  * @type {Number}
  */
-const amountToSend = 0.00100000
+const amountToSend = 0.00000001
 
 
 /**
@@ -58,17 +58,28 @@ const getCurrentGasPrices = async () => {
   return prices
 }
 
+function toWei( val ) {
+  return 1000000000000000000 * val;
+}
+
+function fromWei ( val ) {
+  return val / 1000000000000000000;
+}
 
 /**
  * This is the process that will run when you execute the program.
  */
-const main = async () => {
+async function main () {
 
   /**
    * Fetch your personal wallet's balance
    */
-  let myBalanceWei = web3.eth.getBalance(web3.eth.defaultAccount).toNumber()
-  let myBalance = web3.fromWei(myBalanceWei, 'ether')
+  //let myBalanceWei = web3.eth.getBalance(web3.eth.defaultAccount).toNumber()
+  let myBalanceWei = await web3.eth.getBalance(web3.eth.defaultAccount)
+
+  let myBalance = fromWei(myBalanceWei)
+  
+  log(`Your wallet wei balance is currently ${myBalanceWei} ETH`.green)
 
   log(`Your wallet balance is currently ${myBalance} ETH`.green)
 
@@ -77,7 +88,7 @@ const main = async () => {
    * With every new transaction you send using a specific wallet address,
    * you need to increase a nonce which is tied to the sender wallet.
    */
-  let nonce = web3.eth.getTransactionCount(web3.eth.defaultAccount)
+  let nonce = await web3.eth.getTransactionCount(web3.eth.defaultAccount)
   log(`The outgoing transaction count for your wallet address is: ${nonce}`.magenta)
 
 
@@ -92,7 +103,7 @@ const main = async () => {
    */
   let details = {
     "to": process.env.DESTINATION_WALLET_ADDRESS,
-    "value": web3.toHex( web3.toWei(amountToSend, 'ether') ),
+    "value": web3.utils.numberToHex( toWei(amountToSend) ),
     "gas": 21000,
     "gasPrice": gasPrices.low * 1000000000, // converts the gwei price to wei
     "nonce": nonce,
@@ -100,7 +111,6 @@ const main = async () => {
   }
 
   const transaction = new EthereumTx(details)
-
 
   /**
    * This is where the transaction is authorized on your behalf.
@@ -124,7 +134,7 @@ const main = async () => {
   /**
    * We're ready! Submit the raw transaction details to the provider configured above.
    */
-  const transactionId = web3.eth.sendRawTransaction('0x' + serializedTransaction.toString('hex') )
+  const transactionId = await web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex') );
 
   /**
    * We now know the transaction ID, so let's build the public Etherscan url where
@@ -138,4 +148,10 @@ const main = async () => {
   process.exit()
 }
 
-main()
+try {
+  main();
+} catch (e) {
+  //console.error(e);
+} finally {
+  //console.log('We do cleanup here');
+}
