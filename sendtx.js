@@ -110,7 +110,7 @@ async function main () {
     "chainId": 4 // EIP 155 chainId - mainnet: 1, rinkeby: 4
   }
 
-  const transaction = new EthereumTx(details)
+  const transaction = new EthereumTx(details, {chain:'rinkeby', hardfork: 'petersburg'})
 
   /**
    * This is where the transaction is authorized on your behalf.
@@ -128,20 +128,28 @@ async function main () {
    * Note that the Web3 library is able to automatically determine the "from" address based on your private key.
    */
 
-  // const addr = transaction.from.toString('hex')
-  // log(`Based on your private key, your wallet address is ${addr}`)
+  const addr = transaction.from.toString('hex')
+  log(`Based on your private key, your wallet address is ${addr}`.yellow)
 
   /**
    * We're ready! Submit the raw transaction details to the provider configured above.
    */
-  const transactionId = await web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex') );
+  await web3.eth.sendSignedTransaction('0x' + serializedTransaction.toString('hex') )
+  .catch( error => { console.log (error) } )
+
+  /*
+  let transactionReceipt = await web3.eth.getTransactionReceipt() 
+  console.log ("recibo"+ transactionReceipt)
+  let transactionId = transactionReceipt.transactionHash
+  console.log ("transactionId"+ transactionId)
+  */
 
   /**
    * We now know the transaction ID, so let's build the public Etherscan url where
    * the transaction details can be viewed.
    */
-  const url = `https://rinkeby.etherscan.io/tx/${transactionId}`
-  log(url.cyan)
+  //const url = `https://rinkeby.etherscan.io/tx/${transactionId}`
+  //log(url.cyan)
 
   log(`Note: please allow for 30 seconds before transaction appears on Etherscan`.magenta)
 
