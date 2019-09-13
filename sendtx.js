@@ -12,7 +12,7 @@ const ansi = require('ansicolor').nice
 /**
  * Network configuration
  */
-const testnet = `https://rinkeby.infura.io/v3/${process.env.INFURA_ACCESS_TOKEN}`
+const testnet = `${process.env.INFURA_URL}/${process.env.INFURA_ACCESS_TOKEN}`
 
 
 /**
@@ -107,10 +107,10 @@ async function main () {
     "gas": 21000,
     "gasPrice": gasPrices.low * 1000000000, // converts the gwei price to wei
     "nonce": nonce,
-    "chainId": 4 // EIP 155 chainId - mainnet: 1, rinkeby: 4
+    "chainId": process.env.CHAIN_ID // EIP 155 chainId - mainnet: 1, rinkeby: 4
   }
 
-  const transaction = new EthereumTx(details, {chain:'rinkeby', hardfork: 'petersburg'})
+  const transaction = new EthereumTx(details, {chain:process.env.CHAIN_NAME, hardfork: process.env.CHAIN_HARDFORK})
 
   /**
    * This is where the transaction is authorized on your behalf.
@@ -150,6 +150,13 @@ async function main () {
    */
   //const url = `https://rinkeby.etherscan.io/tx/${transactionId}`
   //log(url.cyan)
+
+  /*
+  var myContract = new web3.eth.Contract(process.env.CONTRACT_ABI, process.env.CONTRACT_ADDRESS, {
+    from: '0x1234567890123456789012345678901234567891', // default from address
+    gasPrice: '20000000000' // default gas price in wei, 20 gwei in this case
+});
+*/
 
   log(`Note: please allow for 30 seconds before transaction appears on Etherscan`.magenta)
 
