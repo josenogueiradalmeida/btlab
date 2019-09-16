@@ -12,8 +12,8 @@ const ansi = require('ansicolor').nice
 /**
  * Network configuration
  */
-const testnet = `${process.env.INFURA_URL}/${process.env.INFURA_ACCESS_TOKEN}`
-
+var testnet = `${process.env.INFURA_URL}/${process.env.INFURA_ACCESS_TOKEN}`
+testnet = "http://localhost:6545"
 
 /**
  * Change the provider that is passed to HttpProvider to `mainnet` for live transactions.
@@ -107,10 +107,10 @@ async function main () {
     "gas": 21000,
     "gasPrice": gasPrices.low * 1000000000, // converts the gwei price to wei
     "nonce": nonce,
-    "chainId": process.env.CHAIN_ID // EIP 155 chainId - mainnet: 1, rinkeby: 4
+    "chainId": 4 //process.env.CHAIN_ID // EIP 155 chainId - mainnet: 1, rinkeby: 4
   }
 
-  const transaction = new EthereumTx(details, {chain:process.env.CHAIN_NAME, hardfork: process.env.CHAIN_HARDFORK})
+  const transaction = new EthereumTx(details, {chain:'rinkeby'})
 
   /**
    * This is where the transaction is authorized on your behalf.
