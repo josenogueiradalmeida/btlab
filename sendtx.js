@@ -25,7 +25,7 @@ const web3 = new Web3( new Web3.providers.HttpProvider(testnet) )
  * Set the web3 default account to use as your public wallet address
  */
 web3.eth.defaultAccount = process.env.WALLET_ADDRESS
-web3.eth.defaultAccount = "0xe7329d7df521bd433498399a5f208d57f374121b"
+//web3.eth.defaultAccount = "0xe7329d7df521bd433498399a5f208d57f374121b"
 
 /**
  * The amount of ETH you want to send in this transaction
@@ -97,6 +97,11 @@ async function main () {
    */
   let gasPrices = await getCurrentGasPrices()
 
+  log('wallet: ' + process.env.WALLET_ADDRESS)
+  log('testnet: ' + testnet)
+  log('chain id: ' +  process.env.CHAIN_ID)
+  log('chain_name: ' +  process.env.CHAIN_NAME)
+  log('chain_hardfork: ' +  process.env.CHAIN_HARDFORK)
 
   /**
    * Build a new transaction object and sign it locally.
@@ -159,25 +164,25 @@ async function main () {
 });
 
 
+
 // using the callback
-await myContract.methods.getResponsibleForDisbursement().call({from: addr}, function(error, result){
-  if (error) log (error);
-  if (result) log (result);
-});
+  await myContract.methods.getResponsibleForDisbursement().call({from: addr}, function(error, result){
+    if (error) log (error);
+    if (result) log ('The disbursement responsible is : ' + result);
+  });
 
-let outraABI = [    {      "constant": false,      "inputs": [        {          "internalType": "uint256",          "name": "amount",          "type": "uint256"        }      ],      "name": "decrease",      "outputs": [],      "payable": false,      "stateMutability": "nonpayable",      "type": "function"    },    {      "constant": false,      "inputs": [        {          "internalType": "uint256",          "name": "amount",          "type": "uint256"        }      ],      "name": "increase",      "outputs": [],      "payable": false,      "stateMutability": "nonpayable",      "type": "function"    },    {      "constant": false,      "inputs": [],      "name": "triple",      "outputs": [        {          "internalType": "uint256",          "name": "",          "type": "uint256"        }      ],      "payable": false,      "stateMutability": "nonpayable",      "type": "function"    },    {      "constant": false,      "inputs": [],      "name": "double",      "outputs": [],      "payable": false,      "stateMutability": "nonpayable",      "type": "function"    }  ]
+  let outraABI = [    {      "constant": false,      "inputs": [        {          "internalType": "uint256",          "name": "amount",          "type": "uint256"        }      ],      "name": "decrease",      "outputs": [],      "payable": false,      "stateMutability": "nonpayable",      "type": "function"    },    {      "constant": false,      "inputs": [        {          "internalType": "uint256",          "name": "amount",          "type": "uint256"        }      ],      "name": "increase",      "outputs": [],      "payable": false,      "stateMutability": "nonpayable",      "type": "function"    },    {      "constant": false,      "inputs": [],      "name": "triple",      "outputs": [        {          "internalType": "uint256",          "name": "",          "type": "uint256"        }      ],      "payable": false,      "stateMutability": "nonpayable",      "type": "function"    },    {      "constant": false,      "inputs": [],      "name": "double",      "outputs": [],      "payable": false,      "stateMutability": "nonpayable",      "type": "function"    }  ]
 
-var counterContract = new web3.eth.Contract(outraABI, "0xB87b994174CA4af8FD7E9e7DED2036564Ba53829", {
-  from: addr, //  from address
-  gasPrice: '20000000000' // default gas price in wei, 20 gwei in this case
-});
-
+  var counterContract = new web3.eth.Contract(outraABI, "0xB87b994174CA4af8FD7E9e7DED2036564Ba53829", {
+    from: addr, //  from address
+    gasPrice: '20000000000' // default gas price in wei, 20 gwei in this case
+  });
 
 // using the callback
 // Infura has not activated the method eth_sendTransaction because this method needs unlocked accounts on the ethereum node. 
-await counterContract.methods.triple().send({from: addr},    function(error, result){
-  if (error) log (error);
-  if (result) log (result);
+  await counterContract.methods.increase(1).send({from: addr},    function(error, result){
+    if (error) log (error);
+    if (result) log (result);
   })
 
   log(`Note: please allow for 30 seconds before transaction appears on Etherscan`.magenta)
