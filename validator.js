@@ -14,9 +14,8 @@ let YOUR_CONTRACT_ADDRESS = "0xDa36BEcf3D78e082AE2147E54609f068AaD7f762"
 let YOUR_CONTRACT_ABI = [{"constant":true,"inputs":[],"name":"getValue","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"value","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"internalType":"uint256","name":"_value","type":"uint256"}],"name":"setValue","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]
 
 web3js = new web3(new web3.providers.HttpProvider( PROVIDER_URL ));
-var i = 0;
 
-app.get('/sendtx',function(req,res){
+app.get('/set/:id',function(req,res){
 
         var myAddress = ADDRESS_THAT_SENDS_TRANSACTION;
         var privateKey = Buffer.from(PRIVATE_KEY, 'hex')        
@@ -24,8 +23,11 @@ app.get('/sendtx',function(req,res){
         //contract abi is the array that you can get from the ethereum wallet or etherscan
         var contractABI = YOUR_CONTRACT_ABI;
         var contractAddress = YOUR_CONTRACT_ADDRESS;
-        //creating contract object
+        //creating contract object        
         var contract = new web3js.eth.Contract(contractABI,contractAddress);
+
+        var param = req.params.id;
+        console.log('user parameter: ' + param);
 
         var count;        
         // get transaction count, later will used as nonce
@@ -40,7 +42,7 @@ app.get('/sendtx',function(req,res){
                 "gasLimit":web3js.utils.toHex(210000),
                 "to":contractAddress,
                 "value":"0x0",
-                "data":contract.methods.setValue(i++).encodeABI(),
+                "data":contract.methods.setValue(param).encodeABI(),
                 "nonce":web3js.utils.toHex(count)
             }
             console.log(rawTransaction);
@@ -52,16 +54,31 @@ app.get('/sendtx',function(req,res){
             web3js.eth.sendSignedTransaction('0x'+transaction.serialize().toString('hex'))
             .on('transactionHash',console.log);
                 
-            //calls the smartcontract to check its value
-            contract.methods.getValue().call()
-            .then(
-                function(result){
-                    res.send(result);
-                    res.end();
-                    console.log(result)
-                });
         })
-    });
+        res.send("escreveu " + param);
+        res.end();
+        console.log(param)
+
+});
+
+app.get('/get',function(req,res){
+
+    //contract abi is the array that you can get from the ethereum wallet or etherscan
+    var contractABI = YOUR_CONTRACT_ABI;
+    var contractAddress = YOUR_CONTRACT_ADDRESS;
+    //creating contract object        
+    var contract = new web3js.eth.Contract(contractABI,contractAddress);
+
+    //calls the smartcontract to check its value
+    contract.methods.getValue().call()
+    .then(
+        function(result){
+            res.send("leu " + result);
+            res.end();
+            console.log(result)
+        }
+    );
+});
 
 
 app.listen(port, () => console.log('App listening on port ' + port + '!'))

@@ -17,11 +17,15 @@ contract CashManager {
     require (address(this).balance >= valueInWei);
     address from = msg.sender;
 		
- 	to.transfer(valueInWei);
+ 	  to.transfer(valueInWei);
 
     cashBalance = address(this).balance;
 
     emit cashTransferred(from, to, valueInWei);
+  }
+
+  function getBalance() public returns (uint256) {
+    return cashBalance;
   }
 
 }
